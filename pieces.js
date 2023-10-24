@@ -46,7 +46,7 @@ const btnFiltrer = document.querySelector('.btn-filtrer')
 //A l'inverse si je veux un tri par prix décroissant je peux faire un calcule différent et j'inverse : b.prix - a.prix.
 btnTrier.addEventListener('click', () => {
     const piecesOrdonnees = Array.from(pieces) //vu que l'ordre va changer avec le bouton, Array.from va garder une copie de l'ordre d'origine.
-    piecesOrdonnees.sort(function (a, b) {     //cela permet nottament de ne pas entrer en conflit avec les autres filtres
+    piecesOrdonnees.sort(function (a, b) {     //cela permet nottament de ne pas entrer en conflit avec les autres filtres, doit le faire avec sort() car il ne le fait pas automatiquement.
         return a.prix - b.prix
     })
     console.log(piecesOrdonnees)
@@ -76,4 +76,101 @@ btnFiltrer.addEventListener('click', function () {
     })
     console.log(piecesFiltrees)
 })
+
+//--------------------------------FONCTION MAP--------------------------
+console.error('Fonction MAP')
+//Je récupére uniquement le nom de chaques piéces, permet d'afficher un élément particulier en gommant tout le reste mais techniquement
+//le reste est toujours présent, juste qu'ils ne sont pas affiché et n'affiche que l'élément en question
+
+/*A l'origine ce serait :
+const noms = pieces.map(function (piece) {
+    return piece.nom
+})
+*/
+
+//Mais ceci est plus court :
+
+//Va creer un nouveau tableau avec uniquement les valeurs de notre tableau que nous voulons.
+//Le style de syntaxe est grandement simplifié, cela s'appelle fonction lambda.
+const noms = pieces.map(piece => piece.nom) 
+console.log(noms)
+//La fonction lambda sera appellée pour chaque éléments de la liste du tableau
+
+//------
+
+//je peux aussi faire des choses ou des calcules utile comme :
+const doublerPrix = pieces.map(piece => piece.prix * 2)
+console.log(doublerPrix)
+//Doublera chaque prix du tableau, et n'affichera que ceci dans ce nouveau tableau grâce à map(), que les valeurs sans les propriétées
+
+//------
+
+//Je veux supprimer certains éléments d'une liste de mon tableau
+
+//Je dois faire une boucle for mais je dois la faire de la fin vers le debut de la liste
+//Sinon la suppression de certains éléments décalerait la suppressions d'autres éléments et fausserai le résultat
+
+const nomsElements = pieces.map(piece => piece.nom)
+for (let i = pieces.length -1; i >= 0; i--) {
+    if (pieces[i].prix > 35) {
+        nomsElements.splice(i, 1) 
+    }
+}
+//splice est une fonction pour supprimer des éléments.
+//i après splice() est la valeur du quel je veux que la vérification et la suppression commence, 1 est le nombre d'éléments à supprimer depuis i.
+console.log(nomsElements)
+
+//------
+
+//J'affiche maintenant les prix abordable sur le site : 
+const fiches = document.querySelector('.fiches')
+const abordables = document.createElement('div')
+abordables.classList.add("abordables")
+abordables.innerText = "Pièces abordables"
+fiches.insertBefore(abordables, fiches.firstChild) //insertBefore sert à placer un élément avant un autre, ici div ira en 1er après .fiches
+
+const abordableElements = document.createElement('ul')
+for (let i = 0; i < nomsElements.length; i++) {
+    const puceNom = document.createElement('li')
+    puceNom.innerText = nomsElements[i]
+    abordableElements.appendChild(puceNom)
+}
+document.querySelector('.abordables')
+    .appendChild(abordableElements)
+
+//-----
+
+//j'affiche sur le site la liste de pièces disponible avec leur prix
+const blocDisponible = document.createElement('div')
+blocDisponible.classList.add('disponible')
+blocDisponible.innerText = "Pièces disponibles"
+fiches.insertBefore(blocDisponible, abordables.nextSibling)
+
+const pieceDisponible = pieces.map(piece => `${piece.nom} - ${piece.prix} €`)
+
+for (let i = pieces.length -1; i >= 0; i--) {
+
+    if (pieces[i].disponibilité === false) {
+        pieceDisponible.splice(i, 1)
+    } 
+}
+
+const puceUl = document.createElement('ul')
+for (let i = 0; i < pieceDisponible.length; i++) {
+    const puceLi = document.createElement('li')
+    puceLi.innerText = pieceDisponible[i]
+    puceUl.appendChild(puceLi)
+}
+blocDisponible.appendChild(puceUl)
+
+//-----
+
+//--------------------------METTRE A JOUR LES ELEMENTS D'UNE PAGE---------------------
+console.error('Mettre à jour les éléments d\'une page')
+//------
+//Disclaimer: innerHTML remplace le contenu de la balise ciblée et prend en compte les balises en string
+//ex : maVariable.innerHTML = ""
+
+
+
 
