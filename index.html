@@ -15,13 +15,15 @@
 			<!-- Menu de recherche -->
 			<section class="filtres">
 				<h3>Filtres</h3>
-				<button class="btn-trier">Trier par prix croissant</button>
-				<br>
-				<button class="btn-trier-decroissant">Trier par prix décroissant</button>
-				<br>
-				<button class="btn-description">Afficher les articles avec description</button>
-				<br>
+				<button class="btn-trier">Trier par prix croissant</button> <br>
+				<button class="btn-trier-decroissant">Trier par prix décroissant</button> <br>
+				<button class="btn-description">Afficher les articles avec description</button> <br>
 				<button class="btn-filtrer">Filtrer les pièces non abordables</button>
+				<p>
+					<label for="filtre-prix">Trier par prix</label> <br> 
+					<input type="range" id="filtre-prix" name="filtre-prix" min="0" max="60" step="5">
+				</p>
+				<p class="valeur-btn"></p>
 			</section>
 
 			<!-- Fiches produits -->

@@ -2,37 +2,44 @@ const reponse = await fetch("pieces-autos.json")
 const pieces = await reponse.json() // sera le résultat attendu contenu dans pieces-auto.json en json
 
 //--------METTRE EN FORME NOS ELEMENTS----------
-for (let i = 0; i < pieces.length; i++) {
 
-    const article = pieces[i] // Va parcourir tout les éléments du tableau json [i], article vaudra toujours pieces[i]
-    const imageElement = document.createElement('img')
-    imageElement.src = article.image //va stocker la valeur de la propriété image contenu dans le fichier pieces-autos.json
-    const nomElement = document.createElement('h2')
-    nomElement.innerText = article.nom
-    const prixElement = document.createElement('p') //si le prix est abordable alors on affiche 1 symbole euro si pas abordable 3 symbole (ternaire)
-    prixElement.innerText = `prix : ${article.prix} € (${article.prix < 35 ? "€" : "€€€"})` //affiche avec backstick car sinon cela affichera juste 60 et non prix 60
-    const categorieElement = document.createElement('p')
-    categorieElement.innerText = article.categorie ?? "(aucune catégorie)"
-    const descriptionElement = document.createElement('p')
-    descriptionElement.innerText = article.description ?? "(Pas de description pour le moment)"
-    //cette dernière est un opérateur Nullish, on peut le préciser lorsque l'on pense avoir une valeur mais qu'on ne l'a pas
-    //Ex : si un client entre une valeur ce sera cette valeur qui sera affichée, si ce n'est pas le cas la valeur renseignée (aucune catégorie)
-    //s'affichera au lieu de null ou undefined
-    const stockElement = document.createElement('p')
-    stockElement.innerText = `(${article.disponibilité ? "En stock" : "Rupture de stock"})`
+//Je creer une fonction dans lequel se trouve l'affichage de ma page qui va pouvoir être réutilisée pour les boutons de filtrage
+function genererPieces(pieces) {
+    for (let i = 0; i < pieces.length; i++) {
 
-    const fiches = document.querySelector('.fiches')
-    const articleElement = document.createElement('article')
-    fiches.appendChild(articleElement)
+        //const article = pieces[i] // Va parcourir tout les éléments du tableau json [i], article vaudra toujours pieces[i]
+        const imageElement = document.createElement('img')
+        imageElement.src = pieces[i].image //va stocker la valeur de la propriété image contenu dans le fichier pieces-autos.json
+        const nomElement = document.createElement('h2')
+        nomElement.innerText = pieces[i].nom
+        const prixElement = document.createElement('p') //si le prix est abordable alors on affiche 1 symbole euro si pas abordable 3 symbole (ternaire)
+        prixElement.innerText = `prix : ${pieces[i].prix} € (${pieces[i].prix < 35 ? "€" : "€€€"})` //affiche avec backstick car sinon cela affichera juste 60 et non prix 60
+        const categorieElement = document.createElement('p')
+        categorieElement.innerText = pieces[i].categorie ?? "(aucune catégorie)"
+        const descriptionElement = document.createElement('p')
+        descriptionElement.innerText = pieces[i].description ?? "(Pas de description pour le moment)"
+        //cette dernière est un opérateur Nullish, on peut le préciser lorsque l'on pense avoir une valeur mais qu'on ne l'a pas
+        //Ex : si un client entre une valeur ce sera cette valeur qui sera affichée, si ce n'est pas le cas la valeur renseignée (aucune catégorie)
+        //s'affichera au lieu de null ou undefined
+        const stockElement = document.createElement('p')
+        stockElement.innerText = `(${pieces[i].disponibilité ? "En stock" : "Rupture de stock"})`
+    
+        const fiches = document.querySelector('.fiches')
+        const articleElement = document.createElement('article')
+        fiches.appendChild(articleElement)
+    
+        //j'ajoute chaques propriété du json à la balise article
+        articleElement.appendChild(imageElement)
+        articleElement.appendChild(nomElement)
+        articleElement.appendChild(prixElement)
+        articleElement.appendChild(categorieElement)
+        articleElement.appendChild(descriptionElement)
+        articleElement.appendChild(stockElement)
+    }
 
-    //j'ajoute chaques propriété du json à la balise article
-    articleElement.appendChild(imageElement)
-    articleElement.appendChild(nomElement)
-    articleElement.appendChild(prixElement)
-    articleElement.appendChild(categorieElement)
-    articleElement.appendChild(descriptionElement)
-    articleElement.appendChild(stockElement)
 }
+
+genererPieces(pieces)
 
 //-----------FILTRER ET TRIER LES ELEMENTS----------
 
@@ -46,10 +53,11 @@ const btnFiltrer = document.querySelector('.btn-filtrer')
 //A l'inverse si je veux un tri par prix décroissant je peux faire un calcule différent et j'inverse : b.prix - a.prix.
 btnTrier.addEventListener('click', () => {
     const piecesOrdonnees = Array.from(pieces) //vu que l'ordre va changer avec le bouton, Array.from va garder une copie de l'ordre d'origine.
-    piecesOrdonnees.sort(function (a, b) {     //cela permet nottament de ne pas entrer en conflit avec les autres filtres, doit le faire avec sort() car il ne le fait pas automatiquement.
+    piecesOrdonnees.sort(function (a, b) {     //cela permet nottament de ne pas entrer en conflit avec les autres filtres, doit faire un Array.from avec sort() car il ne le fait pas automatiquement.
         return a.prix - b.prix
     })
-    console.log(piecesOrdonnees)
+    fiches.innerHTML = "" //je vide le contenu de fiches
+    genererPieces(piecesOrdonnees) //Je met à jour l'affichage de la page (sinon elle n'est stockée qu'en mémoire et on peux le voir qu'avec la console...)
 })
 
 btnTrierDecroissant.addEventListener('click', function () {
@@ -57,7 +65,8 @@ btnTrierDecroissant.addEventListener('click', function () {
     piecesOrdonnees.sort(function (a, b) {
         return b.prix - a.prix
     })
-    console.log(piecesOrdonnees)
+    fiches.innerHTML = ""
+    genererPieces(piecesOrdonnees)
 })
 
 //n'afficher que les articles avec une description
@@ -65,7 +74,8 @@ btnTrierParDescription.addEventListener('click', function () {
     const selectionDescription = pieces.filter(function (piece) {
         return piece.description
     })
-    console.log(selectionDescription)
+    fiches.innerHTML = ""
+    genererPieces(selectionDescription)
 })
 
 //je filtre les prix, avec la fonction filter, je me sert du tableau dans le json, je créer une fonction anonyme (sans nom)
@@ -74,8 +84,31 @@ btnFiltrer.addEventListener('click', function () {
     const piecesFiltrees = pieces.filter(function (piece) {
         return piece.prix <= 35
     })
-    console.log(piecesFiltrees)
+    fiches.innerHTML = ""
+    genererPieces(piecesFiltrees)
 })
+
+//Je filtre en fonction de la barre réglable des prix
+const rangePrix = document.querySelector('#filtre-prix')
+rangePrix.addEventListener('input', () => {
+    const prixFiltre = pieces.filter(function (piece) {
+        return piece.prix <= rangePrix.value
+    })
+    fiches.innerHTML = ""
+    genererPieces(prixFiltre)
+
+    //affiche juste la valeur du prix entre parenthèses pour l'utilisateur :
+    const valeurBtn = document.querySelector('.valeur-btn')
+    valeurBtn.innerText = `(Prix ${rangePrix.value})`
+})
+
+//bonus (rien à voir avec le site, juste pour voir une autre syntaxe de sort() ) : 
+const bonbons = [
+    { "nom": "sucette", "taille": 7 },
+    { "nom": "krema", "taille": 1.5 },
+    { "nom": "crocodiles", "taille": 3 }
+];
+bonbons.sort((a, b) => a.taille - b.taille);
 
 //--------------------------------FONCTION MAP--------------------------
 console.error('Fonction MAP')
@@ -163,14 +196,18 @@ for (let i = 0; i < pieceDisponible.length; i++) {
 }
 blocDisponible.appendChild(puceUl)
 
+//bonus (rien à voir avec le site, juste pour voir une autre syntaxe de map() ) : 
+const prix = [100, 5, 1.5]
+for (let i = 0; i < prix.length; i++) {
+    const prixAJour = prix.map(p => p * 1.2)
+    console.log(prixAJour[i])
+}
+
 //-----
 
 //--------------------------METTRE A JOUR LES ELEMENTS D'UNE PAGE---------------------
 console.error('Mettre à jour les éléments d\'une page')
 //------
 //Disclaimer: innerHTML remplace le contenu de la balise ciblée et prend en compte les balises en string
-//ex : maVariable.innerHTML = ""
-
-
-
+//ex : maVariable.innerHTML = "" , ensuite j'ajoute le contenu mis à jour, cela peut être une fonction comme celle d'en haut de ce fichier js
 
