@@ -1,5 +1,7 @@
-const reponse = await fetch("pieces-autos.json")
-const pieces = await reponse.json() // sera le résultat attendu contenu dans pieces-auto.json en json
+import { ajoutListenersAvis } from "./avis.js"; //permet d'utiliser la fonction exportée dans avis.js, doit utiliser type"module" dans la balise script html pour que cette syntaxe fonctionne
+
+const reponse = await fetch("http://localhost:8081/pieces")
+const pieces = await reponse.json() // sera le résultat attendu contenu dans l'api json db.json en json et à distance.
 
 //--------METTRE EN FORME NOS ELEMENTS----------
 
@@ -27,6 +29,13 @@ function genererPieces(pieces) {
         const fiches = document.querySelector('.fiches')
         const articleElement = document.createElement('article')
         fiches.appendChild(articleElement)
+        
+        //Ici j'utilise dataset pour relier les id du fichier JSON a chaques boutons
+        //j'utilise datased.id et je stock pieces[i].id dans dataset.id, de ce fait, chaques bouton html sera associé à l'article en question.
+        //Peut le voir en inspectant le bouton, cela créera un attribut html : data-id="numero id" dans html.
+        const avisBoutons = document.createElement('button')
+        avisBoutons.dataset.id = pieces[i].id //Il y'a 5 id dans les pieces du json, donc va creer 1 boutons pour chaques pieces, donc 5.
+        avisBoutons.textContent = "Afficher les avis"
     
         //j'ajoute chaques propriété du json à la balise article
         articleElement.appendChild(imageElement)
@@ -35,8 +44,9 @@ function genererPieces(pieces) {
         articleElement.appendChild(categorieElement)
         articleElement.appendChild(descriptionElement)
         articleElement.appendChild(stockElement)
+        articleElement.appendChild(avisBoutons)
     }
-
+    ajoutListenersAvis()
 }
 
 genererPieces(pieces)
@@ -123,7 +133,7 @@ const noms = pieces.map(function (piece) {
 
 //Mais ceci est plus court :
 
-//Va creer un nouveau tableau avec uniquement les valeurs de notre tableau que nous voulons.
+//Va creer un nouveau tableau avec uniquement les valeurs de notre tableau que nous voulons, ici que les noms.
 //Le style de syntaxe est grandement simplifié, cela s'appelle fonction lambda.
 const noms = pieces.map(piece => piece.nom) 
 console.log(noms)
@@ -208,6 +218,9 @@ for (let i = 0; i < prix.length; i++) {
 //--------------------------METTRE A JOUR LES ELEMENTS D'UNE PAGE---------------------
 console.error('Mettre à jour les éléments d\'une page')
 //------
-//Disclaimer: innerHTML remplace le contenu de la balise ciblée et prend en compte les balises en string
+//Disclaimer: innerHTML remplace le contenu de la balise ciblée avec = et prend en compte les balises en string
 //ex : maVariable.innerHTML = "" , ensuite j'ajoute le contenu mis à jour, cela peut être une fonction comme celle d'en haut de ce fichier js
+//Pour ajouter du contenu sans remplacer ce qui est déjà existant je met +=
+//ex : maVariable.innerHTML += "mon code"
+
 
