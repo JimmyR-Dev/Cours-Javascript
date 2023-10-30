@@ -24,6 +24,19 @@
 					<input type="range" id="filtre-prix" name="filtre-prix" min="0" max="60" step="5">
 				</p>
 				<p class="valeur-btn"></p>
+				<!-- code a ajouter -->
+				<h3>Ajouter un avis</h3>
+				<form class="formulaire-avis">
+				    Identifiant de la pièce :<br>
+				    <input type="number" name="piece-id" id="piece-id" required><br>
+				    Nom d'utilisateur :<br>
+					<input type="text" name="utilisateur" id="utilisateur" required><br>
+					Nombres d'étoiles : <br>
+					<input type="number"  name="utilisateur" id="nbre-etoiles" min="1" max="5"><br>
+					Avis :<br>
+					<input type="text" name="commentaire" id="commentaire"><br>
+					<button>Envoyer</button>
+				</form>
 			</section>
 
 			<!-- Fiches produits -->

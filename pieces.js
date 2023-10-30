@@ -1,4 +1,4 @@
-import { ajoutListenersAvis } from "./avis.js"; //permet d'utiliser la fonction exportée dans avis.js, doit utiliser type"module" dans la balise script html pour que cette syntaxe fonctionne
+import { ajoutListenersAvis, ajoutListenerEnvoyerAvis } from "./avis.js"; //permet d'utiliser la fonction exportée dans avis.js, doit utiliser type"module" dans la balise script html pour que cette syntaxe fonctionne
 
 const reponse = await fetch("http://localhost:8081/pieces")
 const pieces = await reponse.json() // sera le résultat attendu contenu dans l'api json db.json en json et à distance.
@@ -46,6 +46,7 @@ function genererPieces(pieces) {
         articleElement.appendChild(stockElement)
         articleElement.appendChild(avisBoutons)
     }
+    ajoutListenerEnvoyerAvis()
     ajoutListenersAvis()
 }
 
