@@ -2,10 +2,10 @@ export function ajoutListenersAvis() {
     const piecesElements = document.querySelectorAll('.fiches article button')
     for (let i = 0; i < piecesElements.length; i++) {
         piecesElements[i].addEventListener('click', async function (event) {
-            const id = event.target.dataset.id //je redéclare le dataset du à la porté des variables, pour l'utiliser dans fetch
-            const reponse = await fetch(`http://localhost:8081/pieces/${id}/avis`)
-            const avis = await reponse.json()
-
+            const id = event.target.dataset.id //Va faire correspondre l'evenement click au bonne id de boutons (précédement crée dans pieces.js)
+                const reponse = await fetch(`http://localhost:8081/pieces/${id}/avis`) //id va permettre d'envoyer les données au bon bouton.
+                const avis = await reponse.json() //Réponse de fetch au format json
+            
             const avisElement = document.createElement('p')
             const pieceElement = event.target.parentElement //parentElement est une propriété
             for (let i = 0; i < avis.length; i++) {
@@ -38,13 +38,95 @@ export function ajoutListenerEnvoyerAvis() {
     })
 }
 
+//---------------------Intégrer un graphique via la librairie chart.js-----------------
+//La doc pour la librairie chart.js se trouve sur https://www.chartjs.org/docs/latest/
 
+// Calcul du nombre total de commentaires par quantité d'étoiles attribuées
+export async function afficherGraphiqueAvis(){
+    const avis = await fetch("http://localhost:8081/avis").then(avis => avis.json())
+    const nbCommentaires = [0, 0, 0, 0, 0]
+    for (let commentaire of avis) {
+        //j'incrémente la note des utilisateurs jusqu'à sa valeur maximale (5) et précise - 1 car en info nous commençons à 0 et sans cela ce serait une note de 0 à 5 et cela ferait une notation à 6 et non 5 comme prévu.
+        nbCommentaires[commentaire.nbEtoiles - 1]++ //parcours toutes les propriétés nbEtoiles du json
+    }
+    console.log(nbCommentaires)
+    //on obtiens [1,1,3,6,9] un commentaire à 1étoile, 1 à 2étoile, 3 à 3 étoiles, 6 à 4 étoiles, 9 à 5 étoiles.
 
+    // Légende qui s'affichera sur la gauche à côté de la barre horizontale :
+    const labels = ["5", "4", "3", "2", "1"]
+    //Les données et personalisation du graphique :
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: "Etoiles attribuées",
+            data: nbCommentaires.reverse(), //inverse l'ordre d'affichage du tableau
+            backgroundColor: "rgba(255, 230, 0, 1)" //jaune
+            
+        }],
+}
+    const config = {
+        type: "bar",
+        data: data, //j'utilise la variable data ici d'en haut.
+        options: {
+        indexAxis: "y",
+        },
+    };
+    // Rendu du graphique dans l'élément canvas
+    const graphiqueAvis = new Chart(
+        document.querySelector("#graphique-avis"),
+        config,
+    );
 
-/**
- * ici je creer une fonction pour ajouter un écouteur d'événement, au click le navigateur enverra une requête de type GET à l'adresse dans fetch
- * dans la ressource pieces, puis j'ajoute l'id ce qui précisera quelle élément nous voulons dans la ressource pieces.
- * */ 
+}
+
+//Afficher un graphique avec une barre ou le nombres de commentaires sont publié sur des article disponible et une deuxiéme sur non disponible
+export async function afficherGraphiqueDisponibilité() {
+
+    const articlesJson = window.localStorage.getItem('pieces')
+    const articles = JSON.parse(articlesJson)
+    const avis = await fetch("http://localhost:8081/avis").then(avis => avis.json())
+    let nbCommentaireDisponible = 0
+    let nbCommentaireIndisponible = 0
+    for (let article of articles) {
+
+        //Je lie les pieceId des utilisateurs et les id des articles et filtre
+        if (article.disponibilite) {
+            const commentaireDeCetArticle = avis.filter(commentaire => commentaire.pieceId === article.id)
+            nbCommentaireDisponible += commentaireDeCetArticle.length
+            
+        }else{
+            const commentaireDeCetArticle = avis.filter(commentaire => commentaire.pieceId === article.id)
+            nbCommentaireIndisponible += commentaireDeCetArticle.length
+            
+        }
+    }
+    console.log(nbCommentaireDisponible)
+    console.log(nbCommentaireIndisponible)
+    const nbcommentaireDispoEtIndispo = [nbCommentaireDisponible, nbCommentaireIndisponible]
+
+    const labels = ["disponible", "non disponible"]
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: "Nombres de commentaires sur pièces",
+            data: nbcommentaireDispoEtIndispo,
+            backgroundColor: "rgba(115, 7, 82, 1)"
+        }],
+    }
+    const config = {
+        type: "bar",
+        data: data, //j'utilise la variable data ici d'en haut.
+        options: {
+        indexAxis: "x",
+        },
+    };
+    // Rendu du graphique dans l'élément canvas
+    const graphiqueAvis = new Chart(
+        document.querySelector("#graphique-avis-stock"),
+        config,
+    );
+
+}
 
 /**
  * Pour attendre des données sans bloquer le code nous utilisont le mot clé await, si la réponse qu'on attend est

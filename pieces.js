@@ -1,7 +1,30 @@
-import { ajoutListenersAvis, ajoutListenerEnvoyerAvis } from "./avis.js"; //permet d'utiliser la fonction exportée dans avis.js, doit utiliser type"module" dans la balise script html pour que cette syntaxe fonctionne
+import { ajoutListenersAvis, ajoutListenerEnvoyerAvis, afficherGraphiqueAvis, afficherGraphiqueDisponibilité } from "./avis.js"; //permet d'utiliser la fonction exportée dans avis.js, doit utiliser type"module" dans la balise script html pour que cette syntaxe fonctionne
 
-const reponse = await fetch("http://localhost:8081/pieces")
-const pieces = await reponse.json() // sera le résultat attendu contenu dans l'api json db.json en json et à distance.
+//----------------------LOCALSTORAGE-----------------
+/**
+ * Le principe va être de stocker des "clés" dans le navigateur(local storage) via l'api du navigateur (chaque navigateur en a un).
+ * Cela peut être par ex : stocker un nom, préférence d'option de l'utilisateur etc, le tout stocker dans le navigateur,
+ * ce qui fait qu'on ne va pas à chaques fois contacter le serveur et cela rend la page plus rapide à charger.
+ */
+
+//Si la clé est déjà présente dans le navigateur (donc pas la 1ère visite) : 
+let pieces = window.localStorage.getItem("pieces")
+//Si ce n'est pas le cas la valeur est null donc :
+if (pieces === null) { 
+    //si le local storage est vide, je récupére les informations via l'api distante
+    const reponse = await fetch("http://localhost:8081/pieces")  //ou : const pieces = await fetch("http://localhost:8081/pieces").then(pieces => pieces.json()); 
+    pieces = await reponse.json() // On attend un résultat en json donc il faut spécifier .json pour qu'il soit lisible.
+    
+    //Les clés - valeurs sont toujours enregistrées en string au format Json dans le local storage donc :
+    const valeurPieces = JSON.stringify(pieces) //Va transformer notre élément en string au format Json
+    //J'utilise un systeme clé/valeur , pieces sera le nom de la clé, valeurPieces sera le contenu de la clé, sa valeur :
+    window.localStorage.setItem("pieces", valeurPieces)
+}else{
+    //Va retransformer les chaines de caractère JSON en code Javascript, pour pouvoir retravailler avec.
+    pieces = JSON.parse(pieces)
+}
+
+console.log(pieces)
 
 //--------METTRE EN FORME NOS ELEMENTS----------
 
@@ -224,4 +247,17 @@ console.error('Mettre à jour les éléments d\'une page')
 //Pour ajouter du contenu sans remplacer ce qui est déjà existant je met +=
 //ex : maVariable.innerHTML += "mon code"
 
+//----------------------LOCALSTORAGE-----------------
 
+//Je supprime les données dans le dans le local storage au click pour mettre à jour les données car elle ne sont pas forcément à jour.
+const btnMaj = document.querySelector('.btn-maj')
+btnMaj.addEventListener('click', function () {
+    window.localStorage.removeItem('pieces')
+})
+//Si je click sur le bouton cela supprime les données, et si je recharge la page je vois bien une nouvelle requête coté api-http.
+
+//--------------------
+
+//Je pense que await ne sert à rien ici car la fonction elle même est en mode async (et elle marche sans), mais le formateur l'a mis...
+await afficherGraphiqueAvis()
+await afficherGraphiqueDisponibilité()
